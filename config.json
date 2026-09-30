@@ -1,0 +1,31 @@
+{
+  "zonaHoraria": "America/Mexico_City",
+  "offset": "-06:00",
+  "aprobador": "",
+  "calendario": {
+    "linkedin": { "dias": ["martes", "jueves"], "hora": "09:00" },
+    "instagram": { "dias": ["martes", "jueves"], "hora": "13:00" }
+  },
+  "imagenes": {
+    "modelo": "gpt-image-2.5-sunburst",
+    "calidad": "high",
+    "variantesPortada": 2,
+    "precioUsdPorMillonTokens": { "textoEntrada": 5, "imagenEntrada": 8, "imagenSalida": 30 }
+  },
+  "formatos": {
+    "instagram": { "ancho": 1080, "alto": 1350, "tamanoGeneracion": "1088x1360" },
+    "linkedin": { "ancho": 1200, "alto": 1200, "tamanoGeneracion": "1200x1200" }
+  },
+  "marca": {
+    "confirmada": false,
+    "colores": { "primario": "#0B2545", "secundario": "#13315C", "acento": "#F2A541", "texto": "#FFFFFF" },
+    "tipografia": "Inter",
+    "logo": "visual/logo/logo.png"
+  },
+  "publicacion": {
+    "instagramGraphVersion": "v25.0",
+    "linkedinVersion": "202609",
+    "margenVencidoHoras": 24,
+    "intentos": 3
+  }
+}

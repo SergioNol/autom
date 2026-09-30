@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family={{tipografia}}:wght@500;800&display=block" rel="stylesheet">
+<style>
+  :root { --w: {{ancho}}px; --h: {{alto}}px; --primario: {{color_primario}}; --secundario: {{color_secundario}}; --acento: {{color_acento}}; --texto: {{color_texto}}; }
+  * { margin: 0; box-sizing: border-box; }
+  body { width: var(--w); height: var(--h); overflow: hidden; font-family: '{{tipografia}}', system-ui, sans-serif; }
+  .lienzo { position: relative; width: 100%; height: 100%; color: var(--texto);
+            background: radial-gradient(circle at 85% 10%, color-mix(in srgb, var(--acento) 25%, transparent), transparent 45%),
+                        linear-gradient(160deg, var(--primario), var(--secundario));
+            display: flex; flex-direction: column; justify-content: center; padding: 0 calc(var(--w) * 0.09); }
+  /* Con foto de fondo, se oscurece para que el texto se lea. */
+  .fondo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.25; }
+  .sin-fondo .fondo { display: none; }
+  .contenido { position: relative; }
+  .acento { width: calc(var(--w) * 0.1); height: calc(var(--w) * 0.014); background: var(--acento); border-radius: 99px; margin-bottom: calc(var(--w) * 0.05); }
+  h1 { font-weight: 800; font-size: calc(var(--w) * 0.075); line-height: 1.1; letter-spacing: -0.015em; }
+  p { margin-top: calc(var(--w) * 0.04); font-weight: 500; font-size: calc(var(--w) * 0.036); line-height: 1.4; opacity: 0.9; }
+  p:empty { display: none; }
+  .logo { position: absolute; left: calc(var(--w) * 0.09); bottom: calc(var(--w) * 0.07); height: calc(var(--w) * 0.06); }
+  .sin-logo .logo { display: none; }
+</style>
+</head>
+<body>
+  <div class="lienzo {{clase_fondo}} {{clase_logo}}">
+    <img class="fondo" src="{{fondo}}" alt="">
+    <div class="contenido">
+      <div class="acento"></div>
+      <h1>{{titulo}}</h1>
+      <p>{{subtitulo}}</p>
+    </div>
+    <img class="logo" src="{{logo}}" alt="">
+  </div>
+</body>
+</html>

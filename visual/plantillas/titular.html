@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family={{tipografia}}:wght@500;800&display=block" rel="stylesheet">
+<style>
+  :root { --w: {{ancho}}px; --h: {{alto}}px; --primario: {{color_primario}}; --secundario: {{color_secundario}}; --acento: {{color_acento}}; --texto: {{color_texto}}; }
+  * { margin: 0; box-sizing: border-box; }
+  body { width: var(--w); height: var(--h); overflow: hidden; font-family: '{{tipografia}}', system-ui, sans-serif; }
+  .lienzo { position: relative; width: 100%; height: 100%; background: linear-gradient(135deg, var(--primario), var(--secundario)); }
+  .fondo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .sin-fondo .fondo { display: none; }
+  .degradado { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, color-mix(in srgb, var(--primario) 92%, transparent) 100%); }
+  .logo { position: absolute; top: calc(var(--w) * 0.05); left: calc(var(--w) * 0.06); height: calc(var(--w) * 0.07); }
+  .sin-logo .logo { display: none; }
+  .texto { position: absolute; left: calc(var(--w) * 0.06); right: calc(var(--w) * 0.06); bottom: calc(var(--w) * 0.07); color: var(--texto); }
+  .acento { width: calc(var(--w) * 0.09); height: calc(var(--w) * 0.012); background: var(--acento); margin-bottom: calc(var(--w) * 0.03); border-radius: 99px; }
+  h1 { font-weight: 800; font-size: calc(var(--w) * 0.068); line-height: 1.08; letter-spacing: -0.01em; }
+  p { margin-top: calc(var(--w) * 0.022); font-weight: 500; font-size: calc(var(--w) * 0.032); line-height: 1.3; opacity: 0.92; }
+  p:empty { display: none; }
+</style>
+</head>
+<body>
+  <div class="lienzo {{clase_fondo}} {{clase_logo}}">
+    <img class="fondo" src="{{fondo}}" alt="">
+    <div class="degradado"></div>
+    <img class="logo" src="{{logo}}" alt="">
+    <div class="texto">
+      <div class="acento"></div>
+      <h1>{{titulo}}</h1>
+      <p>{{subtitulo}}</p>
+    </div>
+  </div>
+</body>
+</html>

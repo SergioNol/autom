@@ -1,0 +1,126 @@
+name: generar
+
+on:
+  schedule:
+    - cron: '0 15 20 * *' # día 20, 09:00 en Ciudad de México (UTC-6)
+  workflow_dispatch:
+    inputs:
+      lote:
+        description: 'Lote AAAA-MM (vacío = mes siguiente)'
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: generar
+  cancel-in-progress: false
+
+jobs:
+  generar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      GH_TOKEN: ${{ github.token }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # historial y etiquetas para el paso de aprendizaje
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Dependencias
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npm install -g @anthropic-ai/claude-code
+
+      - name: Calcular lote
+        id: lote
+        run: node scripts/preparar-lote.ts "${{ inputs.lote }}" >> "$GITHUB_OUTPUT"
+
+      - name: Crear rama
+        env:
+          LOTE: ${{ steps.lote.outputs.lote }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git ls-remote --exit-code --heads origin "lote/$LOTE" >/dev/null; then
+            echo "::error::La rama lote/$LOTE ya existe. Bórrala o cierra su PR antes de regenerar."
+            exit 1
+          fi
+          git checkout -b "lote/$LOTE"
+
+      - name: Aprendizaje (Claude Code)
+        env:
+          LOTE: ${{ steps.lote.outputs.lote }}
+          PREVIO: ${{ steps.lote.outputs.previo }}
+        run: |
+          PROMPT=$(sed "s/{{LOTE}}/$LOTE/g; s/{{LOTE_PREVIO}}/$PREVIO/g" prompts/aprendizaje.md)
+          claude -p "$PROMPT" --permission-mode acceptEdits --max-turns 80 \
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(git tag:*),Bash(cp:*),Bash(rm:*),Bash(ls:*)"
+          # Solo se commitean posts/, generacion/, aprendizaje/ y referencias/ (y la guía, en su PR aparte).
+
+      - name: Separar cambios de guía en su propio PR
+        env:
+          LOTE: ${{ steps.lote.outputs.lote }}
+        run: |
+          GUIA="marca visual/guia-estilo.md"
+          if [ -n "$(git status --porcelain -- $GUIA)" ]; then
+            git stash push -- $GUIA
+            git checkout -b "aprendizaje/$LOTE" origin/main
+            git stash pop
+            git add $GUIA
+            git commit -m "aprendizaje $LOTE: propuesta de cambios a la guía de marca"
+            git push -u origin "aprendizaje/$LOTE"
+            gh pr create --base main --head "aprendizaje/$LOTE" \
+              --title "Propuesta de cambios a la guía ($LOTE)" \
+              --body "Cambios propuestos por el paso de aprendizaje. Ver \`generacion/$LOTE/aprendizaje.md\` en el PR del lote. Acéptalos solo si reflejan un patrón real."
+            git checkout "lote/$LOTE"
+          fi
+
+      - name: Plan del lote (Claude Code)
+        env:
+          LOTE: ${{ steps.lote.outputs.lote }}
+        run: |
+          PROMPT=$(sed "s/{{LOTE}}/$LOTE/g" prompts/generacion.md)
+          claude -p "$PROMPT" --permission-mode acceptEdits --max-turns 120 \
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(npm run validar-plan:*),Bash(ls:*)"
+          npm run validar-plan -- "$LOTE"
+
+      - name: Imágenes y posts
+        run: npm run materializar -- "${{ steps.lote.outputs.lote }}"
+
+      - name: Validar
+        run: npm run validar -- "${{ steps.lote.outputs.lote }}"
+
+      - name: Commit, etiqueta y Pull Request
+        env:
+          LOTE: ${{ steps.lote.outputs.lote }}
+        run: |
+          git add posts generacion aprendizaje referencias
+          git commit -m "lote $LOTE generado"
+          git tag "lote-$LOTE-generado"
+          git push -u origin "lote/$LOTE"
+          git push origin "lote-$LOTE-generado"
+          node scripts/descripcion-pr.ts "$LOTE" > /tmp/descripcion.md
+          REVISOR=$(node -p "require('./config.json').aprobador")
+          gh pr create --base main --head "lote/$LOTE" --title "Contenido $LOTE" \
+            --body-file /tmp/descripcion.md ${REVISOR:+--reviewer "$REVISOR"}
+          # Los eventos creados con GITHUB_TOKEN no disparan otros workflows: se lanza la validación a mano.
+          gh workflow run validar.yml --ref "lote/$LOTE"
+
+      - name: Guardar costos aunque falle
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: generacion-${{ steps.lote.outputs.lote }}
+          path: generacion/
+          if-no-files-found: ignore

@@ -1,0 +1,52 @@
+name: publicar
+
+on:
+  schedule:
+    - cron: '7 * * * *' # cada hora (GitHub puede retrasarlo unos minutos)
+  workflow_dispatch:
+    inputs:
+      simular:
+        description: 'Solo mostrar qué se publicaría'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publicar
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          # Deploy key con escritura, añadida como excepción en la protección de main.
+          # Sin ella se usa GITHUB_TOKEN (solo sirve si main no está protegida).
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Publicar pendientes
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_ORG_ID: ${{ secrets.LINKEDIN_ORG_ID }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if [ "${{ inputs.simular }}" = "true" ]; then
+            node scripts/publicar.ts --simular
+          else
+            node scripts/publicar.ts --commit
+          fi
