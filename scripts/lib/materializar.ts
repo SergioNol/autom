@@ -73,7 +73,9 @@ async function materializarPost(ctx: Contexto, post: PostPlan, slot: Slot): Prom
   const dir = path.join(DIR_POSTS, ctx.lote, post.carpeta);
   await mkdir(dir, { recursive: true });
 
-  const prompts = post.imagenes.flatMap((img, i) => (img.fuente === 'ia' ? [`[${i + 1}] ${img.prompt}`] : []));
+  const prompts = post.imagenes.flatMap((img, i) =>
+    img.fuente === 'ia' ? [`[${i + 1}] ${img.prompt}${img.referencias.length > 0 ? ` (referencias: ${img.referencias.join(', ')})` : ''}`] : [],
+  );
   const texto = serializarPost(
     {
       red: slot.red, formato: post.formato, fecha: slot.fecha, pilar: post.pilar, estado: 'por-revisar',

@@ -125,12 +125,17 @@ No text, no letters, no numbers, no logos, no brands, no watermarks, no real or 
 
 ## Imágenes de referencia
 
-Con referencias en el plan (`referencias`: personajes, posts de `referencias/`), añade al prompt:
+Las imágenes de `referencias/instagram/` y `referencias/linkedin/` se asignan **automáticamente** al generar: una por post, por turnos, para que no se repita siempre la misma (ver `referencias/README.md`). El script añade al prompt:
 
 ```
-Use the reference image only as a guide for style, lighting, color palette and composition.
-Create a new scene; do not copy its text, logos, products or people.
+Use the reference image only as a guide for composition, framing, lighting quality and overall art direction;
+keep the color palette described in this prompt. Create a new scene; do not copy its text, logos, products,
+interface elements or people.
 ```
+
+La referencia aporta composición y dirección de arte; **la paleta siempre es la de esta guía**, aunque la referencia sea oscura o de otra marca.
+
+En el plan, deja `referencias` vacío para usar la rotación. Rellénalo solo para algo concreto (un personaje); entonces la rotación no toca esa imagen.
 
 Para un personaje de `visual/personajes/`, en cambio: "Keep exactly the same character as in the reference image (species, fur, clothing, accessories, clay texture)".
 

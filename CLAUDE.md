@@ -65,7 +65,7 @@ El calendario ya está en `generacion/AAAA-MM/calendario.json` (un `slot` por po
 }
 ```
 
-- `fuente`: `ia` (con `prompt` y `referencias` opcionales: rutas del repo, p. ej. `visual/personajes/rafa.jpg`), `foto-real` (con `foto`: ruta en `visual/fotos-reales/`) o `sin-fondo`.
+- `fuente`: `ia` (con `prompt` y `referencias` opcionales: rutas del repo, p. ej. `visual/personajes/rafa.jpg`; vacío = el script asigna por turnos una referencia de `referencias/<red>/`, no la pongas tú ni añadas su instrucción al prompt), `foto-real` (con `foto`: ruta en `visual/fotos-reales/`) o `sin-fondo`.
 - `serie` (opcional): `feature`, `caso-real`, `resultado` o `parodia`; sin serie, se omite. La plantilla pinta su etiqueta.
 - `plantilla`: `titular` (titular sobre imagen), `limpia` (solo imagen y logo), `texto` (texto sobre fondo claro), `feature` (tarjeta de interfaz; requiere `textos.tarjeta`), `resultado` (cifra enorme). Todas salvo `limpia` requieren `textos.titulo` (máx. 70 caracteres y 8 palabras); `subtitulo` máx. 140.
 - `imagen` = 1 imagen; `carrusel` = 2 a 10.
