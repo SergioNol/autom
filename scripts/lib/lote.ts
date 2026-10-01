@@ -38,3 +38,8 @@ export function slotsDelLote(lote: string, config: Pick<Config, 'calendario' | '
   }
   return slots.sort((a, b) => a.fecha.localeCompare(b.fecha)); // mismo offset: orden de texto = orden cronológico
 }
+
+/** Lote de prueba: solo el primer slot de cada red (para probar el flujo real con poco gasto). */
+export function slotsDePrueba(slots: Slot[]): Slot[] {
+  return REDES.flatMap((red) => slots.find((s) => s.red === red) ?? []).sort((a, b) => a.fecha.localeCompare(b.fecha));
+}

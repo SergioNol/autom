@@ -57,15 +57,33 @@ En `config.json`, pon el usuario de GitHub del aprobador en `"aprobador"` (se as
 
 ## 7. Marca (antes del primer lote)
 
-- Logo en `visual/logo/logo.png` (PNG transparente).
-- Colores reales en `config.json` → `marca.colores`, y `marca.confirmada: true`.
+- Hecho (2026-10-01): logo en `visual/logo/` (original y versión blanca para las plantillas), colores y tipografía en `config.json` → `marca`.
 - Revisar las propuestas de `marca/voz.md`, `marca/pilares.md`, `marca/audiencia.md` y `visual/guia-estilo.md`; quitar las marcas `PENDIENTE`.
 - 10 a 15 posts de referencia por red en `referencias/`.
 - Fotos reales del equipo en `visual/fotos-reales/`.
 - Rellenar `brief-del-mes.md` antes de cada día 20.
 
-## 8. Primera prueba
+## 8. Primera prueba (local, ~US$ 0.50)
 
-1. Local, sin coste: `npm run preparar -- 2026-11`, escribe un `plan.json` de prueba y `npm run materializar -- 2026-11 --simular`.
-2. En GitHub: Actions → **generar** → *Run workflow* con el lote. Revisa el PR, ajusta `imagenes.calidad` en `config.json` (`high` / `xhigh` / `max`) según el resultado y el gasto que muestra el PR.
-3. Actions → **publicar** → *Run workflow* con **simular** para ver qué se publicaría.
+Genera **un post por red** (el primero de cada una) con una imagen hecha a partir de una referencia. Solo necesita `OPENAI_API_KEY`.
+
+1. Copia `.env.example` como `.env` y pon tu clave de OpenAI. `.env` está en `.gitignore`: nunca se sube.
+2. Guarda una imagen de referencia por red (JPG; un post o una foto con el estilo que quieres):
+   - `referencias/linkedin/referencia-prueba.jpg`
+   - `referencias/instagram/referencia-prueba.jpg`
+3. Ejecuta:
+
+   ```bash
+   npm run preparar -- 2026-11 --prueba         # calendario con 1 post por red
+   # Claude escribe generacion/2026-11/plan.json (o reutiliza el que ya hay)
+   npm run validar-plan -- 2026-11
+   npm run materializar -- 2026-11 --simular    # gratis: comprueba textos y plantillas
+   rm -r posts/2026-11                          # borra la simulación (si no, no se regenera)
+   npm run materializar -- 2026-11              # real: llama a OpenAI
+   npm run validar -- 2026-11
+   ```
+
+4. Revisa `posts/2026-11/*/imagen-1.jpg`, la variante alternativa en `generacion/2026-11/variantes/` y el gasto en `generacion/2026-11/costos.json`.
+5. Al terminar, borra la prueba para que no se cuele en el lote real: `rm -r posts/2026-11 generacion/2026-11` (y las referencias de prueba, si no las quieres conservar).
+
+Después, en GitHub: Actions → **generar** → *Run workflow* con el lote. Revisa el PR, ajusta `imagenes.calidad` en `config.json` (`high` / `xhigh` / `max`) según el resultado y el gasto que muestra el PR. Actions → **publicar** → *Run workflow* con **simular** para ver qué se publicaría.

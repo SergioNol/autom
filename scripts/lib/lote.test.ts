@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Config } from './config.ts';
-import { lotePrevio, loteSiguiente, slotsDelLote } from './lote.ts';
+import { lotePrevio, loteSiguiente, slotsDePrueba, slotsDelLote } from './lote.ts';
 
 const config: Pick<Config, 'calendario' | 'offset'> = {
   offset: '-06:00',
@@ -25,4 +25,9 @@ test('noviembre 2026: 4 martes y 4 jueves por red, con fecha y carpeta coherente
   assert.deepEqual(slots[0], { carpeta: '2026-11-03-linkedin-01', red: 'linkedin', fecha: '2026-11-03T09:00:00-06:00' });
   assert.deepEqual(slots[1], { carpeta: '2026-11-03-instagram-01', red: 'instagram', fecha: '2026-11-03T13:00:00-06:00' });
   assert.ok(slots.every((s) => s.fecha.startsWith(s.carpeta.slice(0, 10))));
+});
+
+test('lote de prueba: un solo post por red, el primero de cada una', () => {
+  const slots = slotsDePrueba(slotsDelLote('2026-11', config));
+  assert.deepEqual(slots.map((s) => s.carpeta), ['2026-11-03-linkedin-01', '2026-11-03-instagram-01']);
 });

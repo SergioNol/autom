@@ -10,7 +10,7 @@
     "calendario": "node scripts/calendario.ts",
     "preparar": "node scripts/preparar-lote.ts",
     "validar-plan": "node scripts/validar-plan.ts",
-    "materializar": "node scripts/materializar-lote.ts",
+    "materializar": "node --env-file-if-exists=.env scripts/materializar-lote.ts",
     "descripcion-pr": "node scripts/descripcion-pr.ts",
     "publicar": "node scripts/publicar.ts",
     "verificar-tokens": "node scripts/verificar-tokens.ts",

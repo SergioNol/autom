@@ -32,7 +32,7 @@ lunes ─ tokens.yml ─► avisa si un token caduca o la versión de API de Lin
 
 ```bash
 npm install
-npm run preparar -- 2026-11                 # calendario del lote
+npm run preparar -- 2026-11                 # calendario del lote (--prueba: 1 post por red)
 npm run validar-plan -- 2026-11             # valida generacion/2026-11/plan.json
 npm run materializar -- 2026-11 --simular   # posts + JPEG sin llamar a OpenAI
 npm run validar                             # valida todos los posts
