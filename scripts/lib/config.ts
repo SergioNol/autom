@@ -33,9 +33,8 @@ const configSchema = z.object({
     /** Colores: primario = carbón (texto y fondos oscuros), secundario = fondo claro, acento = coral, texto = blanco sobre oscuro. */
     colores: z.object({ primario: color, secundario: color, acento: color, texto: color }),
     tipografia: z.string(),
-    /** Logo para fondos claros (plantillas por defecto) y versión blanca para fotos (plantilla `limpia`). */
+    /** Logo que llevan todas las imágenes (el isotipo circular). */
     logo: z.string(),
-    logoBlanco: z.string(),
   }),
   publicacion: z.object({
     instagramGraphVersion: z.string().regex(/^v\d+\.\d+$/),

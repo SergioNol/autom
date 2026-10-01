@@ -9,7 +9,6 @@ export interface DatosPlantilla {
   /** Imagen de fondo (IA o foto real). Sin fondo, se usa el color de marca. */
   fondo: Buffer | null;
   logo: Buffer | null;
-  logoBlanco: Buffer | null;
   /** Píldora de la serie ("Feature", "Caso real"…). Vacía = sin etiqueta. */
   etiqueta: string;
   titulo?: string;
@@ -46,7 +45,6 @@ export function rellenarPlantilla(html: string, datos: DatosPlantilla): string {
     etiqueta: escaparHtml(datos.etiqueta),
     fondo: datos.fondo ? dataUrl(datos.fondo) : '',
     logo: datos.logo ? dataUrl(datos.logo) : '',
-    logo_blanco: datos.logoBlanco ? dataUrl(datos.logoBlanco) : '',
     clase_fondo: datos.fondo ? 'con-fondo' : 'sin-fondo',
     clase_logo: datos.logo ? 'con-logo' : 'sin-logo',
     clase_etiqueta: datos.etiqueta ? 'con-etiqueta' : 'sin-etiqueta',
@@ -60,7 +58,7 @@ export async function renderizarJpeg(navegador: Browser, dirPlantillas: string, 
   const pagina = await navegador.newPage({ viewport: { width: datos.ancho, height: datos.alto }, deviceScaleFactor: 1 });
   try {
     await pagina.setContent(rellenarPlantilla(html, datos), { waitUntil: 'networkidle', timeout: 30_000 }).catch(() => undefined);
-    // Las plantillas con ajustes en JS (logo según el fondo, cifra que se encoge) exponen `window.listo`.
+    // Las plantillas con ajustes en JS (p. ej. la cifra que se encoge) exponen `window.listo`.
     await pagina.evaluate(async () => {
       await document.fonts.ready;
       await (window as { listo?: Promise<unknown> }).listo;

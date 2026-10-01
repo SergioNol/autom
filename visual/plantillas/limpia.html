@@ -14,45 +14,17 @@
   .etiqueta { position: absolute; top: var(--my); left: var(--mx); background: var(--primario); color: var(--texto); font-weight: 600;
               font-size: calc(var(--w) * 0.026); padding: calc(var(--w) * 0.012) calc(var(--w) * 0.03); border-radius: 99px; }
   .sin-etiqueta .etiqueta { display: none; }
-  /* Logo negro sobre zonas claras; blanco con sombra suave sobre zonas oscuras (lo decide el script). */
-  .logo { position: absolute; right: var(--mx); bottom: var(--my); height: calc(var(--w) * 0.045); }
-  .logo-blanco { display: none; filter: drop-shadow(0 2px 6px rgb(0 0 0 / 0.35)); }
-  .fondo-oscuro .logo-blanco { display: block; }
-  .fondo-oscuro .logo-negro, .sin-logo .logo { display: none; }
+  /* Isotipo circular: se lee sobre fondos claros y oscuros; la sombra lo separa de la foto. */
+  .logo { position: absolute; right: var(--mx); bottom: var(--my); height: calc(var(--w) * 0.075);
+          filter: drop-shadow(0 2px 8px rgb(0 0 0 / 0.25)); }
+  .sin-logo .logo { display: none; }
 </style>
 </head>
 <body>
   <div class="lienzo {{clase_fondo}} {{clase_logo}} {{clase_etiqueta}}">
     <img class="fondo" src="{{fondo}}" alt="">
     <span class="etiqueta">{{etiqueta}}</span>
-    <img class="logo logo-negro" src="{{logo}}" alt="">
-    <img class="logo logo-blanco" src="{{logo_blanco}}" alt="">
+    <img class="logo" src="{{logo}}" alt="">
   </div>
-  <script>
-    // Brillo medio de la imagen bajo el logo (con el mismo encuadre que object-fit: cover).
-    window.listo = (async () => {
-      const lienzo = document.querySelector('.lienzo');
-      const fondo = document.querySelector('.fondo');
-      const logo = document.querySelector('.logo-negro');
-      if (!fondo.getAttribute('src')) return;
-      await fondo.decode();
-      const { width: W, height: H } = lienzo.getBoundingClientRect();
-      const escala = Math.max(W / fondo.naturalWidth, H / fondo.naturalHeight);
-      const canvas = document.createElement('canvas');
-      canvas.width = W;
-      canvas.height = H;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(fondo, (W - fondo.naturalWidth * escala) / 2, (H - fondo.naturalHeight * escala) / 2,
-                    fondo.naturalWidth * escala, fondo.naturalHeight * escala);
-      const r = logo.getBoundingClientRect();
-      const ancho = Math.max(1, Math.round(r.width || r.height * 4));
-      const { data } = ctx.getImageData(Math.round(r.right - ancho), Math.round(r.top), ancho, Math.max(1, Math.round(r.height)));
-      // Luminancia relativa (WCAG): por debajo de ~0.18 el blanco contrasta más que el negro.
-      const lineal = (v) => ((v /= 255) <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
-      let suma = 0;
-      for (let i = 0; i < data.length; i += 4) suma += 0.2126 * lineal(data[i]) + 0.7152 * lineal(data[i + 1]) + 0.0722 * lineal(data[i + 2]);
-      if (suma / (data.length / 4) < 0.18) lienzo.classList.add('fondo-oscuro');
-    })();
-  </script>
 </body>
 </html>

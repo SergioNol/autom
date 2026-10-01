@@ -27,7 +27,6 @@ interface Contexto {
   config: Config;
   navegador: Browser;
   logo: Buffer | null;
-  logoBlanco: Buffer | null;
   simular: boolean;
   costos: Costos;
   resultado: ResultadoMaterializar;
@@ -93,7 +92,7 @@ async function materializarPost(ctx: Contexto, post: PostPlan, slot: Slot): Prom
     const fondos = await obtenerFondos(ctx, post, slot, img, i);
     const render = (fondo: Buffer | null) =>
       renderizarJpeg(ctx.navegador, path.join(RAIZ, 'visual', 'plantillas'), {
-        plantilla: img.plantilla, fondo, logo: ctx.logo, logoBlanco: ctx.logoBlanco, etiqueta: post.serie ? ETIQUETA_SERIE[post.serie] : '',
+        plantilla: img.plantilla, fondo, logo: ctx.logo, etiqueta: post.serie ? ETIQUETA_SERIE[post.serie] : '',
         ...img.textos, ancho, alto, marca: ctx.config.marca,
       });
 
@@ -120,7 +119,6 @@ export async function materializarLote(plan: Plan, slots: Slot[], config: Config
     config,
     navegador,
     logo: await leerSiExiste(path.join(RAIZ, config.marca.logo)),
-    logoBlanco: await leerSiExiste(path.join(RAIZ, config.marca.logoBlanco)),
     simular,
     costos: await leerCostos(archivoCostos),
     resultado: { posts: 0, imagenesNuevas: 0, variantes: [], costos: { totalUsd: 0, detalle: [] } },

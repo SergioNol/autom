@@ -49,8 +49,7 @@
       "texto": "#FFFFFF"
     },
     "tipografia": "Poppins",
-    "logo": "visual/logo/logo.png",
-    "logoBlanco": "visual/logo/logo-blanco.png"
+    "logo": "visual/logo/isotipo.png"
   },
   "publicacion": {
     "instagramGraphVersion": "v25.0",

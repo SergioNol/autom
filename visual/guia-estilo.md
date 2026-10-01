@@ -144,9 +144,9 @@ tradúcelo a un post del plan con su `serie`, plantilla, prompt de la serie y `t
 
 | Archivo | Uso |
 |---|---|
-| `visual/logo/logo.png` | Original (negro y coral). Lo usan las plantillas sobre fondo claro (`marca.logo`) |
-| `visual/logo/logo-blanco.png` | Blanco con el punto coral, para fotos (plantilla `limpia`, `marca.logoBlanco`) |
-| `visual/logo/isotipo.png` | Isotipo (círculo coral con estrella blanca). No lo usan las plantillas; disponible para avatares o un detalle de marca |
+| `visual/logo/isotipo.png` | **El único logo de las imágenes** (círculo coral con estrella blanca): lo ponen todas las plantillas (`marca.logo`). Funciona sobre fondos claros y oscuros |
+| `visual/logo/logo.png` | Logotipo "Apesdev." (negro y coral). No se usa en las imágenes |
+| `visual/logo/logo-blanco.png` | Logotipo en blanco. No se usa en las imágenes |
 
 ## Nunca
 
