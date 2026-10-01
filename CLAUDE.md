@@ -21,13 +21,17 @@ Todo se revisa en un Pull Request: nada llega a `main` (ni se publica) sin aprob
 
 ## Criterios de contenido
 
+**`visual/guia-estilo.md` manda en todo lo visual**: estética luminosa, paleta (máx. 3 colores), formatos, las 4 series mensuales (3 Feature, 3 Caso real con simios, 2 Resultado, 1 Parodia), el reparto de simios y un prompt base por serie. Nada de video, reels ni stories.
+
 - **Caption** adaptado a la red: LinkedIn más largo y profesional; Instagram más corto y con hashtags (máx. 30, idealmente 8 a 15). La voz de `marca/voz.md` se mantiene en **todos** los posts, también en los últimos.
-- Reparte los pilares de forma equilibrada según sus pesos; no repitas pilar dos veces seguidas en la misma red.
+- Primero coloca las series del mes repartidas entre las dos redes; completa el resto del calendario con posts sin serie (tips, equipo y cultura). Reparte los pilares según sus pesos; no repitas pilar dos veces seguidas en la misma red.
 - Varía los formatos: carruseles para contenido paso a paso o listas; imagen única para mensajes directos.
 - **Alt text** descriptivo de lo que se ve (no repitas el caption).
-- **Prompt de imagen**: parte siempre del *prompt base* de `visual/guia-estilo.md`. Pide espacio libre donde irá el texto. **Nunca** pidas texto, letras ni logos al modelo: los pone la plantilla.
+- **Prompt de imagen**: parte siempre del prompt base **de la serie** (o del general) de `visual/guia-estilo.md`. Pide el tercio superior libre para el titular y el margen de seguridad del 10 %. **Nunca** pidas texto, letras ni logos al modelo: los pone la plantilla. Única excepción: el detalle de texto de la Parodia, citado exacto.
+- **Titulares**: máximo 8 palabras, en español, copiados literalmente si el pedido trae "Texto exacto".
+- **Simios** (serie `caso-real`): un protagonista por carrusel, del reparto fijo de la guía; rota personajes durante el mes. Si existe `visual/personajes/<nombre>.jpg`, va en `referencias` de todas sus diapositivas.
 - Equipo o cultura: usa `foto-real` de `visual/fotos-reales/`. **Nunca generes personas que simulen ser el equipo.** Si no hay fotos adecuadas, elige otro pilar y añade la foto a `fotosSugeridas`.
-- Carruseles: portada con `ia` + `titular`; diapositivas interiores con `sin-fondo` + `texto` (coste cero, más legibles).
+- Carruseles sin serie: portada con `ia` + `titular`; diapositivas interiores con `sin-fondo` + `texto` (coste cero, más legibles). Los de `caso-real` llevan `ia` + `titular` en todas.
 
 ## Plan del lote
 
@@ -43,16 +47,17 @@ El calendario ya está en `generacion/AAAA-MM/calendario.json` (un `slot` por po
     {
       "carpeta": "2026-11-03-linkedin-01",
       "formato": "imagen",
-      "pilar": "tips",
+      "pilar": "producto",
+      "serie": "feature",
       "caption": "Texto completo del post…",
       "altText": "Descripción de la imagen",
       "imagenes": [
         {
           "fuente": "ia",
-          "prompt": "Prompt base + escena concreta…, espacio libre en el tercio inferior, sin texto",
+          "prompt": "Prompt base de la serie + escena concreta…",
           "referencias": [],
-          "plantilla": "titular",
-          "textos": { "titulo": "Máx. 70 caracteres", "subtitulo": "Opcional, máx. 140" }
+          "plantilla": "feature",
+          "textos": { "titulo": "Máx. 8 palabras", "tarjeta": "Cierre de mes completado", "detalle": "Opcional" }
         }
       ]
     }
@@ -60,12 +65,15 @@ El calendario ya está en `generacion/AAAA-MM/calendario.json` (un `slot` por po
 }
 ```
 
-- `fuente`: `ia` (con `prompt` y `referencias` opcionales: rutas del repo, p. ej. `visual/logo/logo.png`), `foto-real` (con `foto`: ruta en `visual/fotos-reales/`) o `sin-fondo`.
-- `plantilla`: `titular` (texto sobre imagen), `limpia` (solo imagen y logo), `texto` (texto sobre color de marca). Las que llevan texto requieren `textos.titulo`.
+- `fuente`: `ia` (con `prompt` y `referencias` opcionales: rutas del repo, p. ej. `visual/personajes/rafa.jpg`), `foto-real` (con `foto`: ruta en `visual/fotos-reales/`) o `sin-fondo`.
+- `serie` (opcional): `feature`, `caso-real`, `resultado` o `parodia`; sin serie, se omite. La plantilla pinta su etiqueta.
+- `plantilla`: `titular` (titular sobre imagen), `limpia` (solo imagen y logo), `texto` (texto sobre fondo claro), `feature` (tarjeta de interfaz; requiere `textos.tarjeta`), `resultado` (cifra enorme). Todas salvo `limpia` requieren `textos.titulo` (máx. 70 caracteres y 8 palabras); `subtitulo` máx. 140.
 - `imagen` = 1 imagen; `carrusel` = 2 a 10.
 - Valida con `npm run validar-plan -- AAAA-MM` hasta que no haya errores.
 
-El workflow genera después `posts/AAAA-MM/AAAA-MM-DD-red-NN/post.md` + `imagen-N.jpg` y abre el PR.
+El workflow genera después `posts/AAAA-MM/AAAA-MM-DD-red-NN/post.md` + `imagen-N.jpg` (y guarda los fondos sin texto en `generacion/AAAA-MM/fondos/`) y abre el PR.
+
+Pedidos sueltos con el formato `Serie | Formato | Escena | Texto exacto`: ver "Pedidos sueltos" en `visual/guia-estilo.md`.
 
 ## Aprendizaje
 

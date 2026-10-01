@@ -6,7 +6,7 @@ import type { Config } from './config.ts';
 import { costoUsd, generarImagen } from './imagenes/openai.ts';
 import { renderizarJpeg } from './imagenes/plantillas.ts';
 import type { Slot } from './lote.ts';
-import { dirGeneracion, type ImagenPlan, type Plan, type PostPlan } from './plan.ts';
+import { ETIQUETA_SERIE, dirGeneracion, type ImagenPlan, type Plan, type PostPlan } from './plan.ts';
 import { serializarPost } from './post.ts';
 import { DIR_POSTS, RAIZ } from './repositorio.ts';
 
@@ -27,6 +27,7 @@ interface Contexto {
   config: Config;
   navegador: Browser;
   logo: Buffer | null;
+  logoBlanco: Buffer | null;
   simular: boolean;
   costos: Costos;
   resultado: ResultadoMaterializar;
@@ -38,18 +39,31 @@ async function leerCostos(archivo: string): Promise<Costos> {
   return existsSync(archivo) ? (JSON.parse(await readFile(archivo, 'utf8')) as Costos) : { totalUsd: 0, detalle: [] };
 }
 
+const leerSiExiste = async (ruta: string) => (existsSync(ruta) ? await readFile(ruta) : null);
+
+/** Fondo IA sin texto: `generacion/<lote>/fondos/<carpeta>/imagen-N.jpg` (revisión y futuras referencias de personajes). */
+const rutaFondo = (lote: string, carpeta: string, i: number) => path.join(dirGeneracion(lote), 'fondos', carpeta, `imagen-${i + 1}.jpg`);
+
 /** Devuelve los fondos de una imagen: el elegido y, si aplica, las variantes alternativas. */
-async function obtenerFondos(ctx: Contexto, post: PostPlan, slot: Slot, img: ImagenPlan, esPortada: boolean): Promise<(Buffer | null)[]> {
+async function obtenerFondos(ctx: Contexto, post: PostPlan, slot: Slot, img: ImagenPlan, i: number): Promise<(Buffer | null)[]> {
   if (img.fuente === 'sin-fondo') return [null];
   if (img.fuente === 'foto-real') return [await readFile(path.join(RAIZ, img.foto))];
   if (ctx.simular) return [null];
 
-  const n = esPortada ? ctx.config.imagenes.variantesPortada : 1;
+  // Caso real: las diapositivas 2…N toman la 1 como referencia para que el simio sea el mismo en todo el carrusel.
+  const portada = i > 0 && post.serie === 'caso-real' ? await leerSiExiste(rutaFondo(ctx.lote, post.carpeta, 0)) : null;
+  const n = i === 0 ? ctx.config.imagenes.variantesPortada : 1;
   const { imagenes, uso } = await generarImagen(
-    { prompt: img.prompt, tamano: ctx.config.formatos[slot.red].tamanoGeneracion, n, referencias: img.referencias },
+    {
+      prompt: img.prompt, tamano: ctx.config.formatos[slot.red].tamanoGeneracion, n, referencias: img.referencias,
+      generadas: portada ? [portada] : [],
+    },
     ctx.config.imagenes,
     RAIZ,
   );
+  const destino = rutaFondo(ctx.lote, post.carpeta, i);
+  await mkdir(path.dirname(destino), { recursive: true });
+  await writeFile(destino, imagenes[0]!);
   const usd = costoUsd(uso, ctx.config.imagenes.precioUsdPorMillonTokens);
   ctx.costos.detalle.push({ carpeta: post.carpeta, imagen: img.prompt.slice(0, 60), usd });
   ctx.costos.totalUsd = Math.round((ctx.costos.totalUsd + usd) * 10_000) / 10_000;
@@ -76,10 +90,11 @@ async function materializarPost(ctx: Contexto, post: PostPlan, slot: Slot): Prom
     const destino = path.join(dir, `imagen-${i + 1}.jpg`);
     if (existsSync(destino)) continue; // reanudar sin volver a pagar imágenes ya generadas
 
-    const fondos = await obtenerFondos(ctx, post, slot, img, i === 0);
+    const fondos = await obtenerFondos(ctx, post, slot, img, i);
     const render = (fondo: Buffer | null) =>
       renderizarJpeg(ctx.navegador, path.join(RAIZ, 'visual', 'plantillas'), {
-        plantilla: img.plantilla, fondo, logo: ctx.logo, ...img.textos, ancho, alto, marca: ctx.config.marca,
+        plantilla: img.plantilla, fondo, logo: ctx.logo, logoBlanco: ctx.logoBlanco, etiqueta: post.serie ? ETIQUETA_SERIE[post.serie] : '',
+        ...img.textos, ancho, alto, marca: ctx.config.marca,
       });
 
     await writeFile(destino, await render(fondos[0] ?? null));
@@ -99,13 +114,13 @@ async function materializarPost(ctx: Contexto, post: PostPlan, slot: Slot): Prom
 /** Escribe `posts/<lote>/*` (post.md + JPEG) a partir del plan ya validado. */
 export async function materializarLote(plan: Plan, slots: Slot[], config: Config, simular: boolean): Promise<ResultadoMaterializar> {
   const archivoCostos = path.join(dirGeneracion(plan.lote), 'costos.json');
-  const rutaLogo = path.join(RAIZ, config.marca.logo);
   const navegador = await chromium.launch();
   const ctx: Contexto = {
     lote: plan.lote,
     config,
     navegador,
-    logo: existsSync(rutaLogo) ? await readFile(rutaLogo) : null,
+    logo: await leerSiExiste(path.join(RAIZ, config.marca.logo)),
+    logoBlanco: await leerSiExiste(path.join(RAIZ, config.marca.logoBlanco)),
     simular,
     costos: await leerCostos(archivoCostos),
     resultado: { posts: 0, imagenesNuevas: 0, variantes: [], costos: { totalUsd: 0, detalle: [] } },

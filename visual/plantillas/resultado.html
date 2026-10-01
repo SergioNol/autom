@@ -8,33 +8,36 @@
           --primario: {{color_primario}}; --secundario: {{color_secundario}}; --acento: {{color_acento}}; --texto: {{color_texto}}; }
   * { margin: 0; box-sizing: border-box; }
   body { width: var(--w); height: var(--h); overflow: hidden; font-family: '{{tipografia}}', system-ui, sans-serif; }
-  .lienzo { position: relative; width: 100%; height: 100%; background: var(--secundario); color: var(--primario);
+  .lienzo { position: relative; width: 100%; height: 100%; color: var(--primario); background: linear-gradient(160deg, #fff, var(--secundario));
             display: flex; flex-direction: column; justify-content: center; padding: var(--my) var(--mx); }
-  /* Con foto de fondo, queda muy tenue para que el texto se lea. */
-  .fondo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.12; }
-  .sin-fondo .fondo { display: none; }
   .etiqueta { position: absolute; top: var(--my); left: var(--mx); background: var(--primario); color: var(--texto); font-weight: 600;
               font-size: calc(var(--w) * 0.026); padding: calc(var(--w) * 0.012) calc(var(--w) * 0.03); border-radius: 99px; }
   .sin-etiqueta .etiqueta { display: none; }
-  .contenido { position: relative; }
-  .acento { width: calc(var(--w) * 0.1); height: calc(var(--w) * 0.014); background: var(--acento); border-radius: 99px; margin-bottom: calc(var(--w) * 0.05); }
-  h1 { font-weight: 800; font-size: calc(var(--w) * 0.075); line-height: 1.1; letter-spacing: -0.02em; }
-  p { margin-top: calc(var(--w) * 0.04); font-weight: 500; font-size: calc(var(--w) * 0.038); line-height: 1.4; opacity: 0.75; }
+  /* La cifra es la protagonista: se reduce sola si no cabe en el ancho útil. */
+  h1 { font-weight: 800; font-size: calc(var(--w) * 0.22); line-height: 1; letter-spacing: -0.04em; white-space: nowrap; }
+  .acento { width: calc(var(--w) * 0.12); height: calc(var(--w) * 0.014); background: var(--acento); border-radius: 99px;
+            margin: calc(var(--w) * 0.05) 0 calc(var(--w) * 0.04); }
+  p { font-weight: 500; font-size: calc(var(--w) * 0.042); line-height: 1.3; opacity: 0.75; }
   p:empty { display: none; }
   .logo { position: absolute; left: var(--mx); bottom: var(--my); height: calc(var(--w) * 0.045); }
   .sin-logo .logo { display: none; }
 </style>
 </head>
 <body>
-  <div class="lienzo {{clase_fondo}} {{clase_logo}} {{clase_etiqueta}}">
-    <img class="fondo" src="{{fondo}}" alt="">
+  <div class="lienzo {{clase_logo}} {{clase_etiqueta}}">
     <span class="etiqueta">{{etiqueta}}</span>
-    <div class="contenido">
-      <div class="acento"></div>
-      <h1>{{titulo}}</h1>
-      <p>{{subtitulo}}</p>
-    </div>
+    <h1>{{titulo}}</h1>
+    <div class="acento"></div>
+    <p>{{subtitulo}}</p>
     <img class="logo" src="{{logo}}" alt="">
   </div>
+  <script>
+    window.listo = document.fonts.ready.then(() => {
+      const h1 = document.querySelector('h1');
+      const ancho = h1.parentElement.clientWidth - 2 * parseFloat(getComputedStyle(h1.parentElement).paddingLeft);
+      let tamano = parseFloat(getComputedStyle(h1).fontSize);
+      while (h1.scrollWidth > ancho && tamano > 40) h1.style.fontSize = `${(tamano *= 0.95)}px`;
+    });
+  </script>
 </body>
 </html>

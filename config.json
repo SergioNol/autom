@@ -35,21 +35,22 @@
       "tamanoGeneracion": "1088x1360"
     },
     "linkedin": {
-      "ancho": 1200,
-      "alto": 1200,
-      "tamanoGeneracion": "1200x1200"
+      "ancho": 1080,
+      "alto": 1350,
+      "tamanoGeneracion": "1088x1360"
     }
   },
   "marca": {
     "confirmada": true,
     "colores": {
       "primario": "#111827",
-      "secundario": "#1F2937",
+      "secundario": "#F3F4F6",
       "acento": "#FF5757",
       "texto": "#FFFFFF"
     },
     "tipografia": "Poppins",
-    "logo": "visual/logo/logo-blanco.png"
+    "logo": "visual/logo/logo.png",
+    "logoBlanco": "visual/logo/logo-blanco.png"
   },
   "publicacion": {
     "instagramGraphVersion": "v25.0",

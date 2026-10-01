@@ -9,6 +9,7 @@
 - **Práctica.** Cada post deja algo aplicable: un paso, un dato del brief, una comprobación.
 - **Clara.** Frases cortas, sin tecnicismos innecesarios; si usamos uno, lo explicamos.
 - **Honesta.** Nada de promesas exageradas ni cifras sin fuente.
+- **Con humor seco.** Inteligente y directo; el chiste está en la situación, nunca en burlarse del cliente ni en exagerar.
 
 ## Tono por red
 

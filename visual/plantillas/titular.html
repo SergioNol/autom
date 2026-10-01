@@ -2,34 +2,39 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<link href="https://fonts.googleapis.com/css2?family={{tipografia}}:wght@500;800&display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family={{tipografia}}:wght@500;600;800&display=block" rel="stylesheet">
 <style>
-  :root { --w: {{ancho}}px; --h: {{alto}}px; --primario: {{color_primario}}; --secundario: {{color_secundario}}; --acento: {{color_acento}}; --texto: {{color_texto}}; }
+  /* Margen de seguridad del 10 % en todos los bordes (la cuadrícula de perfil recorta). */
+  :root { --w: {{ancho}}px; --h: {{alto}}px; --mx: calc(var(--w) * 0.1); --my: calc(var(--h) * 0.1);
+          --primario: {{color_primario}}; --secundario: {{color_secundario}}; --acento: {{color_acento}}; --texto: {{color_texto}}; }
   * { margin: 0; box-sizing: border-box; }
   body { width: var(--w); height: var(--h); overflow: hidden; font-family: '{{tipografia}}', system-ui, sans-serif; }
-  .lienzo { position: relative; width: 100%; height: 100%; background: linear-gradient(135deg, var(--primario), var(--secundario)); }
+  .lienzo { position: relative; width: 100%; height: 100%; background: var(--secundario); color: var(--primario); }
   .fondo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .sin-fondo .fondo { display: none; }
-  .degradado { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, color-mix(in srgb, var(--primario) 92%, transparent) 100%); }
-  .logo { position: absolute; top: calc(var(--w) * 0.05); left: calc(var(--w) * 0.06); height: calc(var(--w) * 0.07); }
-  .sin-logo .logo { display: none; }
-  .texto { position: absolute; left: calc(var(--w) * 0.06); right: calc(var(--w) * 0.06); bottom: calc(var(--w) * 0.07); color: var(--texto); }
-  .acento { width: calc(var(--w) * 0.09); height: calc(var(--w) * 0.012); background: var(--acento); margin-bottom: calc(var(--w) * 0.03); border-radius: 99px; }
-  h1 { font-weight: 800; font-size: calc(var(--w) * 0.068); line-height: 1.08; letter-spacing: -0.01em; }
-  p { margin-top: calc(var(--w) * 0.022); font-weight: 500; font-size: calc(var(--w) * 0.032); line-height: 1.3; opacity: 0.92; }
+  .sin-fondo .fondo, .sin-fondo .velo { display: none; }
+  /* Velo claro arriba para que el titular se lea sobre cualquier imagen. */
+  .velo { position: absolute; inset: 0; background: linear-gradient(180deg, color-mix(in srgb, var(--secundario) 90%, transparent) 0%, transparent 40%); }
+  .cabecera { position: absolute; top: var(--my); left: var(--mx); right: var(--mx); }
+  .etiqueta { display: inline-block; background: var(--primario); color: var(--texto); font-weight: 600; font-size: calc(var(--w) * 0.026);
+              padding: calc(var(--w) * 0.012) calc(var(--w) * 0.03); border-radius: 99px; margin-bottom: calc(var(--w) * 0.03); }
+  .sin-etiqueta .etiqueta { display: none; }
+  h1 { font-weight: 800; font-size: calc(var(--w) * 0.07); line-height: 1.08; letter-spacing: -0.02em; }
+  p { margin-top: calc(var(--w) * 0.02); font-weight: 500; font-size: calc(var(--w) * 0.034); line-height: 1.3; opacity: 0.75; }
   p:empty { display: none; }
+  .logo { position: absolute; left: var(--mx); bottom: var(--my); height: calc(var(--w) * 0.045); }
+  .sin-logo .logo { display: none; }
 </style>
 </head>
 <body>
-  <div class="lienzo {{clase_fondo}} {{clase_logo}}">
+  <div class="lienzo {{clase_fondo}} {{clase_logo}} {{clase_etiqueta}}">
     <img class="fondo" src="{{fondo}}" alt="">
-    <div class="degradado"></div>
-    <img class="logo" src="{{logo}}" alt="">
-    <div class="texto">
-      <div class="acento"></div>
+    <div class="velo"></div>
+    <div class="cabecera">
+      <span class="etiqueta">{{etiqueta}}</span>
       <h1>{{titulo}}</h1>
       <p>{{subtitulo}}</p>
     </div>
+    <img class="logo" src="{{logo}}" alt="">
   </div>
 </body>
 </html>

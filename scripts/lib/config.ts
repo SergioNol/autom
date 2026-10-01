@@ -30,9 +30,12 @@ const configSchema = z.object({
   marca: z.object({
     /** false mientras los colores sean provisionales: el PR lo avisa. */
     confirmada: z.boolean(),
+    /** Colores: primario = carbón (texto y fondos oscuros), secundario = fondo claro, acento = coral, texto = blanco sobre oscuro. */
     colores: z.object({ primario: color, secundario: color, acento: color, texto: color }),
     tipografia: z.string(),
+    /** Logo para fondos claros (plantillas por defecto) y versión blanca para fotos (plantilla `limpia`). */
     logo: z.string(),
+    logoBlanco: z.string(),
   }),
   publicacion: z.object({
     instagramGraphVersion: z.string().regex(/^v\d+\.\d+$/),

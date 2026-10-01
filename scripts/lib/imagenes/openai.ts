@@ -27,21 +27,22 @@ interface RespuestaOpenAI {
 const MIME: Record<string, string> = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
 
 /**
- * Genera `n` imágenes. Con referencias (logo, fotos de marca) usa /edits; sin ellas, /generations.
+ * Genera `n` imágenes (JPEG). Con referencias (rutas del repo o imágenes ya generadas en memoria) usa /edits; sin ellas, /generations.
  * La API key solo se lee del entorno (GitHub Secrets).
  */
 export async function generarImagen(
-  args: { prompt: string; tamano: string; n: number; referencias: string[] },
+  args: { prompt: string; tamano: string; n: number; referencias: string[]; generadas?: Buffer[] },
   config: Config['imagenes'],
   raiz: string,
 ): Promise<ResultadoImagen> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error('Falta OPENAI_API_KEY');
   const headers = { Authorization: `Bearer ${apiKey}` };
-  const comunes = { model: config.modelo, prompt: args.prompt, size: args.tamano, quality: config.calidad, n: args.n, output_format: 'png' };
+  const comunes = { model: config.modelo, prompt: args.prompt, size: args.tamano, quality: config.calidad, n: args.n, output_format: 'jpeg' };
 
   const respuesta = await conReintentos(3, async () => {
-    if (args.referencias.length === 0) {
+    const generadas = args.generadas ?? [];
+    if (args.referencias.length === 0 && generadas.length === 0) {
       return exigirOk(
         await fetch(`${API}/generations`, { method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify(comunes) }),
         'OpenAI generations',
@@ -53,6 +54,7 @@ export async function generarImagen(
       const datos = await readFile(path.join(raiz, ref));
       form.append('image[]', new Blob([datos], { type: MIME[path.extname(ref).toLowerCase()] ?? 'image/png' }), path.basename(ref));
     }
+    for (const [i, datos] of generadas.entries()) form.append('image[]', new Blob([new Uint8Array(datos)], { type: 'image/jpeg' }), `generada-${i + 1}.jpg`);
     return exigirOk(await fetch(`${API}/edits`, { method: 'POST', headers, body: form }), 'OpenAI edits');
   });
 

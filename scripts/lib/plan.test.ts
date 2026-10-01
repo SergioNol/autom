@@ -47,3 +47,27 @@ test('exige título en plantillas con texto y cantidad de imágenes por formato'
   assert.ok(errores.some((e) => e.includes('necesita textos.titulo')));
   assert.ok(errores.some((e) => e.includes('"imagen" lleva 1 imagen')));
 });
+
+test('titulares de máximo 8 palabras', () => {
+  const plan = structuredClone(planValido);
+  plan.posts[0]!.imagenes = [{ ...imagenIa, textos: { titulo: 'Uno dos tres cuatro cinco seis siete ocho nueve' } }];
+  assert.ok(validarPlan(plan, '2026-11', SLOTS, PILARES).some((e) => e.includes('más de 8 palabras')));
+});
+
+test('cada serie usa sus plantillas y fuentes', () => {
+  const feature = { ...imagenIa, plantilla: 'feature', textos: { titulo: 'Cierra el mes sin perseguir a nadie', tarjeta: 'Cierre de mes completado' } };
+  const resultado = { fuente: 'sin-fondo', plantilla: 'resultado', textos: { titulo: '-72%', subtitulo: 'de tiempo de cierre' } };
+
+  const valido = structuredClone(planValido) as Record<string, any>;
+  Object.assign(valido.posts[0], { serie: 'feature', imagenes: [feature] });
+  Object.assign(valido.posts[1], { serie: 'resultado', formato: 'imagen', imagenes: [resultado] });
+  assert.deepEqual(validarPlan(valido, '2026-11', SLOTS, PILARES), []);
+
+  const malo = structuredClone(planValido) as Record<string, any>;
+  Object.assign(malo.posts[0], { imagenes: [{ ...feature, textos: { titulo: 'Sin tarjeta' } }] });
+  Object.assign(malo.posts[1], { serie: 'caso-real' });
+  const errores = validarPlan(malo, '2026-11', SLOTS, PILARES);
+  assert.ok(errores.some((e) => e.includes('"feature" necesita textos.tarjeta')));
+  assert.ok(errores.some((e) => e.includes('"feature" es solo para la serie feature')));
+  assert.ok(errores.some((e) => e.includes('caso-real (simios) genera todas sus imágenes con ia')));
+});

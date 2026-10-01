@@ -6,8 +6,16 @@ import { FORMATOS, IMAGENES_POR_FORMATO } from './post.ts';
 import { RAIZ } from './repositorio.ts';
 import { validarContenido } from './validacion.ts';
 
-export const PLANTILLAS = ['titular', 'limpia', 'texto'] as const;
+export const PLANTILLAS = ['titular', 'limpia', 'texto', 'feature', 'resultado'] as const;
 export type Plantilla = (typeof PLANTILLAS)[number];
+
+/** Series mensuales de visual/guia-estilo.md. La etiqueta (píldora) la pone la plantilla; la parodia no lleva. */
+export const SERIES = ['feature', 'caso-real', 'resultado', 'parodia'] as const;
+export type Serie = (typeof SERIES)[number];
+export const ETIQUETA_SERIE: Record<Serie, string> = { feature: 'Feature', 'caso-real': 'Caso real', resultado: 'Resultado', parodia: '' };
+
+export const MAX_PALABRAS_TITULO = 8;
+const palabras = (texto: string) => texto.split(/\s+/).filter(Boolean).length;
 
 export const dirGeneracion = (lote: string, raiz = RAIZ) => path.join(raiz, 'generacion', lote);
 
@@ -15,6 +23,9 @@ const textos = z
   .object({
     titulo: z.string().trim().max(70).optional(),
     subtitulo: z.string().trim().max(140).optional(),
+    /** Plantilla `feature`: texto principal y secundario de la tarjeta de interfaz. */
+    tarjeta: z.string().trim().max(40).optional(),
+    detalle: z.string().trim().max(60).optional(),
   })
   .default({});
 
@@ -37,6 +48,7 @@ const postPlanSchema = z.object({
   carpeta: z.string(),
   formato: z.enum(FORMATOS),
   pilar: z.string(),
+  serie: z.enum(SERIES).optional(),
   caption: z.string().trim().min(1),
   altText: z.string().trim().min(1).max(1000),
   imagenes: z.array(imagenPlanSchema).min(1).max(10),
@@ -92,9 +104,40 @@ export function validarPlan(datos: unknown, lote: string, slots: Slot[], pilares
       if (img.plantilla !== 'limpia' && !img.textos.titulo) {
         errores.push(`${pre}.imagenes[${i}]: la plantilla "${img.plantilla}" necesita textos.titulo`);
       }
+      if (img.textos.titulo && palabras(img.textos.titulo) > MAX_PALABRAS_TITULO) {
+        errores.push(`${pre}.imagenes[${i}]: el título tiene más de ${MAX_PALABRAS_TITULO} palabras`);
+      }
+      if (img.plantilla === 'feature' && !img.textos.tarjeta) {
+        errores.push(`${pre}.imagenes[${i}]: la plantilla "feature" necesita textos.tarjeta`);
+      }
     }
+    errores.push(...validarSerie(post).map((e) => `${pre}: ${e}`));
   }
 
   for (const slot of slots) if (!vistas.has(slot.carpeta)) errores.push(`falta el post del calendario ${slot.carpeta}`);
+  return errores;
+}
+
+/** Reglas de cada serie (visual/guia-estilo.md). */
+function validarSerie(post: PostPlan): string[] {
+  const errores: string[] = [];
+  const plantillas = post.imagenes.map((img) => img.plantilla);
+  if (post.serie !== 'feature' && plantillas.includes('feature')) errores.push('la plantilla "feature" es solo para la serie feature');
+  if (post.serie !== 'resultado' && plantillas.includes('resultado')) errores.push('la plantilla "resultado" es solo para la serie resultado');
+
+  switch (post.serie) {
+    case 'feature':
+      if (plantillas[0] !== 'feature') errores.push('la serie feature empieza con la plantilla "feature"');
+      break;
+    case 'resultado':
+      if (plantillas.some((p) => p !== 'resultado')) errores.push('la serie resultado usa solo la plantilla "resultado"');
+      break;
+    case 'caso-real':
+      if (post.imagenes.some((img) => img.fuente !== 'ia')) errores.push('la serie caso-real (simios) genera todas sus imágenes con ia');
+      break;
+    case 'parodia':
+      if (post.imagenes[0]?.fuente !== 'ia') errores.push('la serie parodia necesita una imagen ia');
+      break;
+  }
   return errores;
 }

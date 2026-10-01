@@ -47,8 +47,9 @@ npm test && npm run typecheck
 |---|---|
 | Horarios | Martes y jueves; LinkedIn 09:00, Instagram 13:00 (CDMX). Se cambian en `config.json` |
 | Imágenes | `gpt-image-2.5-sunburst`, calidad `high`, 2 variantes solo en la portada (la alternativa va en el PR) |
-| Tamaños | Instagram 1080×1350 (4:5), LinkedIn 1200×1200 |
-| Texto sobre imagen | Plantillas HTML renderizadas con Chromium (nunca el modelo) |
+| Tamaños | 1080×1350 (4:5) en ambas redes, también en carruseles |
+| Estilo | Guía de `visual/guia-estilo.md`: estética luminosa, 4 series mensuales (Feature, Caso real con simios, Resultado, Parodia). Sin video por ahora |
+| Texto sobre imagen | Plantillas HTML renderizadas con Chromium (el modelo solo escribe el detalle de la Parodia) |
 | Calendario | Determinista desde `config.json`; Claude solo decide contenido |
 | Retrasos | Si un post aprobado lleva más de 24 h sin publicarse, pasa a `fallido` ("fecha vencida") |
 | Reintentos | 3 por publicación, solo ante errores HTTP transitorios (nunca ante errores de red, para no duplicar) |
